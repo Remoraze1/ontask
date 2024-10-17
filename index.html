@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #f39c12;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #f39c12;
+            border: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stay on Task!</h1>
+        <button onclick="startMonitoring()">Start Monitoring</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const distractingWebsites = ['youtube.com', 'reddit.com', 'facebook.com'];
+
+        function checkTabTitles() {
+            chrome.tabs.query({}, function(tabs) {
+                tabs.forEach(tab => {
+                    distractingWebsites.forEach(site => {
+                        if (tab.url.includes(site)) {
+                            flashTitle(tab.id);
+                        }
+                    });
+                });
+            });
+        }
+
+        function flashTitle(tabId) {
+            let flashing = true;
+            let interval = setInterval(() => {
+                if (flashing) {
+                    chrome.tabs.executeScript(tabId, {code: 'document.title = "⚠️ GET BACK TO WORK ⚠️";'});
+                } else {
+                    chrome.tabs.executeScript(tabId, {code: 'document.title = "⚠️⚠️⚠️⚠️";'});
+                }
+                flashing = !flashing;
+            }, 1000);
+
+            setTimeout(() => clearInterval(interval), 10000); // Stop flashing after 10 seconds
+        }
+
+        function startMonitoring() {
+            document.getElementById('status').innerText = "Monitoring started...";
+            setInterval(checkTabTitles, 5000); // Check tabs every 5 seconds
+        }
+    </script>
+</body>
+</html>
